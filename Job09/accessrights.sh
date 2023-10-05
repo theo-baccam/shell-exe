@@ -1,13 +1,20 @@
+# Le chemin vers le répertoire contenant le script et ses fichiers
 path=$(echo $0 | rev | cut -c 17- | rev)
-echo $path
+
+# Créer modifsave si il n'existe pas
+if [[ ! -f "$path/modifsave" ]]; then
+	touch $path/modifsave
+fi
+
 modifsave=$(cat $path/modifsave)
-lastmodif=$(stat -c=%y $path/Shell_Userlist.csv)
+lastmodif=$(date -r Shell_Userlist.csv +%d-%m-%y-%H:%M)
+
 if [[ "$modifsave" != "$lastmodif" ]]; then
 	while IFS="," read -r id prenom nom mdp role
 	do
 		username=$(echo "$prenom.$nom" | tr '[:upper:]' '[:lower:]')
 		if [ $(echo $username | wc -m) -lt 3 ]; then
-			exit 0
+			break
 		fi
 		nrole=$(echo $role | tr -d '\r' | cat -t)
 		sudo useradd $username 
@@ -18,5 +25,5 @@ if [[ "$modifsave" != "$lastmodif" ]]; then
 			sudo usermod -aG users $username
 		fi
 	done < <(tail -n +2 $path/Shell_Userlist.csv | tr -d " " && echo "")
-	stat -c=%y $path/Shell_Userlist.csv > $path/modifsave
+	echo $lastmodif > $path/modifsave
 fi
