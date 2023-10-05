@@ -1,4 +1,5 @@
-path=$(echo $0 | cut -c -1)
+path=$(echo $0 | rev | cut -c 17- | rev)
+echo $path
 modifsave=$(cat $path/modifsave)
 lastmodif=$(stat -c=%y $path/Shell_Userlist.csv)
 if [[ "$modifsave" != "$lastmodif" ]]; then
